@@ -105,8 +105,8 @@ def profile(message):
             bonuses = crm_data.get("bonus", 0)
             msg = (
                 f"👤 Ваш профіль:\n\n"
-                f"📛 Ім'я: {user["name"]}\n"
-                f"📞 Телефон: {user["phone"]}\n"
+                f"📛 Ім'я: {user['name']}\n"
+                f"📞 Телефон: {user['phone']}\n"
                 f"🎁 Бонуси: {bonuses}\n"
                 # f"🆔 Poster ID: {user["poster_id"]}"
             )
