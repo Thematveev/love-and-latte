@@ -1,0 +1,6 @@
+/venv
+/.idea
+config.py
+users.db
+bot.log
+**/__pycache__
