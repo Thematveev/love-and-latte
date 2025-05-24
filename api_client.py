@@ -56,7 +56,7 @@ class Client:
         logger.debug(f"Item response: {data}")
         return data['response']
 
-    def create_new_client(self, name: str, phone: str, group_id: int = 1):
+    def create_new_client(self, name: str, phone: str, group_id: int = 8):
         logger.info(f"Creating new client: {name}, phone: {phone}")
         response = self.session.post(
             "https://joinposter.com/api/clients.createClient",
