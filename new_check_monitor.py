@@ -7,10 +7,9 @@ from datetime import date
 def run_monitor(timeout: int, new_transaction_callback=None):
     client = Client(POSTER_TOKEN)
     processed_checks = set()
-    total_payed = 0
-    current_date = date.today().strftime("%Y-%m-%d")
+    # total_payed = 0
     while True:
-        response = client.get_transactions(current_date)
+        response = client.get_transactions(date.today().strftime("%Y-%m-%d"))
         response.reverse()
         for check in response:
             if check["transaction_id"] not in processed_checks:
@@ -20,9 +19,9 @@ def run_monitor(timeout: int, new_transaction_callback=None):
                 print("----New transaction-----")
                 print(transaction_id, payed_sum, client_id)
 
-                total_payed += float(payed_sum)
+                # total_payed += float(payed_sum)
 
-                print("New Total ->", round(total_payed, 2))
+                # print("New Total ->", round(total_payed, 2))
                 print("------------------------\n")
 
                 if new_transaction_callback:
