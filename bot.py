@@ -1,3 +1,5 @@
+from io import BytesIO
+
 import telebot
 from telebot import types
 from config import TOKEN, POSTER_TOKEN
@@ -6,6 +8,7 @@ from api_client import Client
 import logging
 from new_check_monitor import run_monitor
 from threading import Thread
+import qrcode
 
 # Настройка логирования
 logging.basicConfig(
@@ -27,6 +30,7 @@ init_db()
 def main_menu():
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add(types.KeyboardButton("👤 Мій профіль"))
+    markup.add(types.KeyboardButton("🎟️ Моя картка"))
     return markup
 
 
@@ -79,9 +83,10 @@ def get_phone(message, name):
         existing_info = client.get_client_by_phone(phone)
         if existing_info:
             poster_id = existing_info['client_id']
+            client.modify_existing_client(poster_id, message.chat.id)
             logging.info(f"Використано існуючого клієнта: poster_id={poster_id} для user_id={user_id}")
         else:
-            crm_response = client.create_new_client(name, phone)
+            crm_response = client.create_new_client(name, phone, user_id)
             print(crm_response)
             poster_id = crm_response['response']  # ← отриманий poster_id
             logging.info(f"Створено клієнта в CRM: poster_id={poster_id} для user_id={user_id}")
@@ -102,7 +107,7 @@ def profile(message):
     if user:
         try:
             crm_data = client.get_client_by_id(user["poster_id"])
-            bonuses = crm_data.get("bonus", 0)
+            bonuses = float(crm_data.get("bonus", 0)) / 100
             msg = (
                 f"👤 Ваш профіль:\n\n"
                 f"📛 Ім'я: {user['name']}\n"
@@ -120,8 +125,27 @@ def profile(message):
         bot.send_message(user_id, "Вас не знайдено в базі. Натисніть /start для реєстрації.")
 
 
+@bot.message_handler(func=lambda m: m.text == "🎟️ Моя картка")
+def qr_code_handler(message):
+    qr = qrcode.QRCode(version=1, box_size=10, border=4)
+    qr.add_data(message.chat.id)
+    qr.make(fit=True)
+    img = qr.make_image(fill="black", back_color="white")
+
+    # Сохраняем изображение в память
+    bio = BytesIO()
+    bio.name = 'qr.png'
+    img.save(bio, 'PNG')
+    bio.seek(0)
+
+    # Отправка QR-кода
+    bot.send_photo(message.chat.id, photo=bio)
+
+
+
+
 if __name__ == "__main__":
     # Запуск бота
-    monitor_thread = Thread(target=run_monitor, args=(10,), daemon=True)
-    monitor_thread.start()
+    # monitor_thread = Thread(target=run_monitor, args=(10,), daemon=True)
+    # monitor_thread.start()
     bot.polling()

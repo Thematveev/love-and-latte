@@ -56,7 +56,7 @@ class Client:
         logger.debug(f"Item response: {data}")
         return data['response']
 
-    def create_new_client(self, name: str, phone: str, group_id: int = 8):
+    def create_new_client(self, name: str, phone: str, card_number: str, group_id: int = 8):
         logger.info(f"Creating new client: {name}, phone: {phone}")
         response = self.session.post(
             "https://joinposter.com/api/clients.createClient",
@@ -67,11 +67,28 @@ class Client:
                 "client_name": name,
                 "client_groups_id_client": group_id,
                 "phone": phone,
-                "comment": "from telegram"
+                "comment": "from telegram",
+                "card_number": card_number
             }
         )
         data = response.json()
         logger.debug(f"Create client response: {data}")
+        return data
+
+    def modify_existing_client(self, client_id: int, card_number: str):
+        logger.info(f"Modification of client {client_id}")
+        response = self.session.post(
+            "https://joinposter.com/api/clients.updateClient",
+            params={
+                "token": self.token
+            },
+            json={
+                "client_id": client_id,
+                "card_number": card_number
+            }
+        )
+        data = response.json()
+        logger.debug(f"Modify client response: {data}")
         return data
 
     def get_client_by_phone(self, phone: str):
